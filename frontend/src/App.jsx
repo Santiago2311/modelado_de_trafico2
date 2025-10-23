@@ -114,6 +114,39 @@ export default function App() {
           ))
         )}
         
+        {/* Trafficlights */}
+        {agents.filter(a => a.type === "trafficlight").map(light => {
+          const x = light.pos[0] * scale;
+          const y = light.pos[1] * scale;
+          
+          return (
+            <g key={light.id}>
+              <rect x={x - 4} y={y - 15} width={8} height={30} fill="#222" rx="2" />
+              
+              <circle 
+                cx={x} 
+                cy={y - 10} 
+                r={3} 
+                fill={light.state === "red" ? "#ff0000" : "#440000"} 
+              />
+              
+              <circle 
+                cx={x} 
+                cy={y} 
+                r={3} 
+                fill={light.state === "yellow" ? "#ffff00" : "#444400"} 
+              />
+              
+              <circle 
+                cx={x} 
+                cy={y + 10} 
+                r={3} 
+                fill={light.state === "green" ? "#00ff00" : "#004400"} 
+              />
+            </g>
+          );
+        })}
+
         {agents.filter(a => a.type === "car").map(car => {
           const x = car.pos[0] * scale;
           const y = car.pos[1] * scale;
