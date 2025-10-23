@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 
 export default function App() {
   let [location, setLocation] = useState("");
-  let [cars, setCars] = useState([]);
+  let [agents, setAgents] = useState([]);
   let [simSpeed] = useState(10);
   const running = useRef(null);
 
@@ -16,7 +16,7 @@ export default function App() {
       .then(data => {
         console.log(data);
         setLocation(data["Location"]);
-        setCars(data["cars"]);
+        setAgents(data["agents"]);
       });
   }
 
@@ -25,7 +25,7 @@ export default function App() {
       fetch("http://localhost:8000" + location)
         .then(res => res.json())
         .then(data => {
-          setCars(data["cars"]);
+          setAgents(data["agents"]);
         });
     }, 1000 / simSpeed);
   };
@@ -33,6 +33,12 @@ export default function App() {
   const handleStop = () => {
     clearInterval(running.current);
   }
+
+  const scale = 8;
+  const width = 100 * scale;
+  const height = 100 * scale;
+  const streetWidth = 8 * scale;
+  const streets = [20, 40, 60, 80];
 
   return (
     <div>
@@ -46,16 +52,84 @@ export default function App() {
         <button onClick={handleStop}>
           Stop
         </button>
-        {/* <SliderField label="Car Speed" min={1} max={10} type='number' value={simSpeed} onChange={handleSimSpeedSliderChange}/> */}
       </div>
-      <svg width="1500" height="500" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: "white" }}>
-
-        <rect x={0} y={200} width={1500} height={80} style={{ fill: "darkgray" }}></rect>
-        {
-          cars.map(car =>
-            <image id={car.id} x={car.pos[0] * 32} y={200} width={32} href="./racing-car.png" />
-          )
-        }
+      <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: "white" }}>
+        
+        {/* Horizontal Streets */}
+        {streets.map(pos => (
+          <g key={`h-street-${pos}`}>
+            <rect 
+              x={0} 
+              y={(pos - 4) * scale} 
+              width={width} 
+              height={streetWidth} 
+              fill="#555"
+            />
+            {/* Yellow line */}
+            <line 
+              x1={0} 
+              y1={pos * scale} 
+              x2={width} 
+              y2={pos * scale} 
+              stroke="#ffff00" 
+              strokeWidth="2" 
+              strokeDasharray="10,10"
+            />
+          </g>
+        ))}
+        
+        {/* Vertical Streets */}
+        {streets.map(pos => (
+          <g key={`v-street-${pos}`}>
+            <rect 
+              x={(pos - 4) * scale} 
+              y={0} 
+              width={streetWidth} 
+              height={height} 
+              fill="#555"
+            />
+            <line 
+              x1={pos * scale} 
+              y1={0} 
+              x2={pos * scale} 
+              y2={height} 
+              stroke="#ffff00" 
+              strokeWidth="2" 
+              strokeDasharray="10,10"
+            />
+          </g>
+        ))}
+        
+        {/* Intersections */}
+        {streets.map(x => 
+          streets.map(y => (
+            <rect 
+              key={`intersection-${x}-${y}`}
+              x={(x - 4) * scale} 
+              y={(y - 4) * scale} 
+              width={streetWidth} 
+              height={streetWidth} 
+              fill="#444"
+            />
+          ))
+        )}
+        
+        {agents.filter(a => a.type === "car").map(car => {
+          const x = car.pos[0] * scale;
+          const y = car.pos[1] * scale;
+          return (
+            <rect 
+              key={car.id}
+              x={x - 8}
+              y={y - 4}
+              width={16}
+              height={8}
+              fill="#3498db"
+              stroke="#2c3e50"
+              strokeWidth="1"
+            />
+          );
+        })}
       </svg>
     </div>
   );

@@ -10,12 +10,17 @@ route("/simulations", method=POST) do
     id = string(uuid1())
     instances[id] = model
 
-    cars = []
-    for car in allagents(model)
-        push!(cars, car)
+    agents_data = []
+    for agent in allagents(model)
+        push!(agents_data, Dict(
+            "id" => agent.id,
+            "type" => "trafficlight",
+            "pos" => agent.pos,
+            "state" => agent.state
+        ))
     end
 
-    json(Dict("Location" => "/simulations/$id", "cars" => cars))
+    json(Dict("Location" => "/simulations/$id", "agents" => agents_data))
 end
 
 route("/simulations/:id") do
@@ -23,14 +28,19 @@ route("/simulations/:id") do
     println(id)
     model = instances[id]
     run!(model, 1)
-    cars = []
-    for car in allagents(model)
-        push!(cars, car)
+
+    agents_data = []
+    for agent in allagents(model)
+        push!(agents_data, Dict(
+            "id" => agent.id,
+            "type" => "trafficlight",
+            "pos" => agent.pos,
+            "state" => agent.state
+        ))
     end
 
-    json(Dict("cars" => cars))
+    json(Dict("agents" => agents_data))
 end
-
 
 Genie.config.run_as_server = true
 Genie.config.cors_headers["Access-Control-Allow-Origin"] = "*"
