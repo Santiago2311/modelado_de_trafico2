@@ -114,7 +114,7 @@ export default function App() {
           ))
         )}
         
-        {/* Trafficlights */}
+        {/* Trafficlight */}
         {agents.filter(a => a.type === "trafficlight").map(light => {
           const x = light.pos[0] * scale;
           const y = light.pos[1] * scale;
@@ -146,21 +146,27 @@ export default function App() {
             </g>
           );
         })}
-
+        
+        {/* Cars */}
         {agents.filter(a => a.type === "car").map(car => {
           const x = car.pos[0] * scale;
           const y = car.pos[1] * scale;
           return (
-            <rect 
-              key={car.id}
-              x={x - 8}
-              y={y - 4}
-              width={16}
-              height={8}
-              fill="#3498db"
-              stroke="#2c3e50"
-              strokeWidth="1"
-            />
+            <g key={car.id}>
+              <rect 
+                x={x - 8}
+                y={y - 4}
+                width={16}
+                height={8}
+                fill="#3498db"
+                stroke="#2c3e50"
+                strokeWidth="1"
+                rx="2"
+              />
+              {/* Ventanas */}
+              <rect x={x - 5} y={y - 2} width={4} height={4} fill="#87ceeb" />
+              <rect x={x + 1} y={y - 2} width={4} height={4} fill="#87ceeb" />
+            </g>
           );
         })}
       </svg>
