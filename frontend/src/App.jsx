@@ -3,19 +3,27 @@ import { useState, useRef } from 'react';
 export default function App() {
   const [location, setLocation] = useState("");
   const [agents, setAgents] = useState([]);
+  const [stats, setStats] = useState({ car_count: 0, average_speed: 0, step_count: 0 });
+  const [carsPerStreet, setCarsPerStreet] = useState(5);
   const [simSpeed] = useState(10);
   const running = useRef(null);
 
   const setup = () => {
+    if (running.current) {
+      clearInterval(running.current);
+      running.current = null;
+    }
+
     fetch("http://localhost:8000/simulations", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
+      body: JSON.stringify({ cars_per_street: carsPerStreet })
     })
       .then(resp => resp.json())
       .then(data => {
         setLocation(data.Location);
         setAgents(data.agents);
+        setStats(data.stats);
       })
       .catch(err => console.error("Error en setup:", err));
   };
@@ -27,6 +35,7 @@ export default function App() {
         .then(res => res.json())
         .then(data => {
           setAgents(data.agents);
+          setStats(data.stats);
         })
         .catch(err => console.error("Error en step:", err));
     }, 1000 / simSpeed);
@@ -48,9 +57,29 @@ export default function App() {
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "10px" }}>
+          Autos por calle:
+          <input 
+            type="number" 
+            min="1" 
+            max="7" 
+            value={carsPerStreet} 
+            onChange={(e) => setCarsPerStreet(parseInt(e.target.value))}
+            style={{ marginLeft: "10px", padding: "5px", width: "60px" }}
+          />
+        </label>
+      </div>
+      
+      <div style={{ marginBottom: "10px" }}>
         <button onClick={setup} style={{ marginRight: "10px", padding: "8px 16px" }}>Setup</button>
         <button onClick={handleStart} style={{ marginRight: "10px", padding: "8px 16px" }}>Start</button>
         <button onClick={handleStop} style={{ padding: "8px 16px" }}>Stop</button>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
+        <span style={{ marginRight: "20px" }}>Autos: {stats.car_count}</span>
+        <span style={{ marginRight: "20px" }}>Velocidad promedio: {stats.average_speed.toFixed(2)}</span>
+        <span>Pasos: {stats.step_count}</span>
       </div>
       
       <svg width={width} height={height} style={{ backgroundColor: "#e0e0e0", border: "2px solid #333" }}>
